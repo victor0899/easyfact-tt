@@ -1,4 +1,3 @@
-// src/components/auth/LoginForm.tsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -7,7 +6,6 @@ import { z } from 'zod';
 import { useAuthStore } from '../../store/authStore';
 import { toast } from 'react-hot-toast';
 
-// Esquema de validación con Zod
 const loginSchema = z.object({
   email: z.string().email('Correo electrónico inválido'),
   password: z.string().min(1, 'La contraseña es requerida'),
@@ -40,7 +38,8 @@ const LoginForm = () => {
       navigate('/dashboard');
     } catch (error) {
       console.error('Error durante el inicio de sesión:', error);
-      toast.error('Credenciales incorrectas. Por favor, intenta de nuevo.');
+      // Cambio aquí: mensaje más específico sobre credenciales incorrectas
+      toast.error('Usuario o contraseña incorrecta');
     } finally {
       setIsLoading(false);
     }

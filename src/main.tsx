@@ -1,16 +1,9 @@
-// src/main.tsx
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
-
-// Configurar interceptores globales y otras configuraciones
 import axios from 'axios';
-
-// Configurar headers predeterminados para las solicitudes
 axios.defaults.headers.common['Content-Type'] = 'application/json';
-
-// Asignar token si existe en el localStorage (útil para recargas de página)
 const authStorage = localStorage.getItem('auth-storage');
 if (authStorage) {
   try {

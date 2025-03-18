@@ -1,11 +1,10 @@
-// src/store/authStore.ts
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import axios from 'axios';
 
 interface AuthState {
   token: string | null;
-  refreshToken: string | null;
+  clienteId: string | null;
   user: { email: string } | null;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
@@ -17,7 +16,7 @@ export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       token: null,
-      refreshToken: null,
+      clienteId: null,
       user: null,
       isAuthenticated: false,
 
@@ -28,14 +27,13 @@ export const useAuthStore = create<AuthState>()(
             password,
           });
 
-          const { token, refreshToken } = response.data;
-
-          // Configurar el token en los headers por defecto para todas las solicitudes
-          axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+          console.log('Login response:', response.data);
+          const { access_token, payload } = response.data;
+          axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
 
           set({
-            token,
-            refreshToken,
+            token: access_token,
+            clienteId: payload?.userId || null,
             user: { email },
             isAuthenticated: true,
           });
@@ -46,51 +44,47 @@ export const useAuthStore = create<AuthState>()(
       },
 
       logout: () => {
-        // Eliminar el token del header por defecto
         delete axios.defaults.headers.common['Authorization'];
-
         set({
           token: null,
-          refreshToken: null,
+          clienteId: null,
           user: null,
           isAuthenticated: false,
         });
+        
+        console.log('Sesión cerrada correctamente');
       },
 
       refreshSession: async () => {
         try {
           const state = useAuthStore.getState();
-          if (!state.refreshToken) {
-            throw new Error('No hay refresh token disponible');
+          if (!state.clienteId) {
+            throw new Error('No hay clienteId disponible');
           }
 
-          const response = await axios.post('https://dte.auth.dev.easyfact.com.sv/api/auth/refresh-token', {
-            refreshToken: state.refreshToken,
+          const response = await axios.post('https://dte.auth.dev.easyfact.com.sv/api/auth/refreshtoken', {
+            clienteId: state.clienteId,
           });
-
-          const { token, refreshToken } = response.data;
-
-          // Actualizar el token en los headers
-          axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+          console.log('Refresh token response:', response.data);
+          const { access_token } = response.data;
+          axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
 
           set({
-            token,
-            refreshToken,
+            token: access_token,
             isAuthenticated: true,
           });
         } catch (error) {
           console.error('Error al refrescar token:', error);
-          // Si falla el refresh, hacemos logout
           useAuthStore.getState().logout();
           throw error;
         }
       },
     }),
     {
-      name: 'auth-storage', // nombre para localStorage
+      name: 'auth-storage', 
       partialize: (state) => ({
         token: state.token,
-        refreshToken: state.refreshToken,
+        clienteId: state.clienteId,
         user: state.user,
         isAuthenticated: state.isAuthenticated,
       }),
@@ -98,25 +92,18 @@ export const useAuthStore = create<AuthState>()(
   )
 );
 
-// Configurar interceptor para refrescar el token cuando expire
 axios.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    
-    // Si el error es 401 (Unauthorized) y no hemos intentado refrescar el token antes
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       
       try {
-        // Intentar refrescar el token
         await useAuthStore.getState().refreshSession();
-        
-        // Volver a intentar la solicitud original con el nuevo token
         originalRequest.headers['Authorization'] = `Bearer ${useAuthStore.getState().token}`;
         return axios(originalRequest);
       } catch (refreshError) {
-        // Si falla el refresh, redirigir al login
         useAuthStore.getState().logout();
         window.location.href = '/login';
         return Promise.reject(refreshError);

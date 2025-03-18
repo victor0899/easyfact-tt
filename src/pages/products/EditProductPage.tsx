@@ -1,9 +1,9 @@
-// src/pages/products/EditProductPage.tsx
 import { useEffect, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import ProductForm from '../../components/products/ProductForm';
-import productService, { Product } from '../../lib/api/productService';
+import productService from '../../lib/api/productService';
+import { Product } from '../../types/product';
 
 const EditProductPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -22,6 +22,7 @@ const EditProductPage = () => {
       setIsLoading(true);
       try {
         const data = await productService.getById(id);
+        console.log('Detalle del producto:', data);
         setProduct(data);
         setError(null);
       } catch (err) {
@@ -38,7 +39,7 @@ const EditProductPage = () => {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-screen">
+      <div className="w-full flex justify-center items-center h-64">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
       </div>
     );
@@ -46,14 +47,14 @@ const EditProductPage = () => {
 
   if (error || !product) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="w-full">
         <div className="mb-6">
           <Link to="/products" className="text-indigo-600 hover:text-indigo-800">
             &larr; Volver al listado
           </Link>
         </div>
         
-        <div className="bg-white shadow rounded-lg p-6 text-center">
+        <div className="form-container text-center">
           <div className="text-red-500 text-xl mb-4">{error || 'Producto no encontrado'}</div>
           <button
             onClick={() => navigate('/products')}
@@ -67,14 +68,14 @@ const EditProductPage = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="w-full">
       <div className="mb-6">
         <Link to="/products" className="text-indigo-600 hover:text-indigo-800">
           &larr; Volver al listado
         </Link>
       </div>
       
-      <div className="bg-white shadow rounded-lg p-6">
+      <div className="form-container">
         <h1 className="text-2xl font-bold mb-6">Editar Producto</h1>
         <ProductForm product={product} isEditing={true} />
       </div>

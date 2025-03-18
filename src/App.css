@@ -5,6 +5,7 @@
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
+  color: inherit; /* Heredar el color del texto del elemento padre */
 }
 
 .logo {
