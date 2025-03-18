@@ -103,9 +103,9 @@ const ProductsListPage = () => {
         <h1 className="text-2xl font-bold mb-4 md:mb-0">Listado de Productos</h1>
         <Link
           to="/products/new"
-          className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+          className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-green-700"
         >
-          Nuevo Producto
+          + Nuevo Producto
         </Link>
       </div>
 
@@ -163,15 +163,15 @@ const ProductsListPage = () => {
                     <div className="flex justify-center space-x-2">
                       <Link
                         to={`/products/${product.id}`}
-                        className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
+                        className="px-3 py-1 bg-red-600 text-white rounded hover:bg-gray-700 text-sm"
                       >
-                        Eliminar
+                        Editar
                       </Link>
                       <button
                         onClick={() => handleRemoveProduct(product.id)}
-                        className="px-3 py-1 bg-gray-600 text-white rounded hover:bg-gray-700 text-sm"
+                        className="px-3 py-1 bg-gray-600 text-white rounded hover:bg-red-700 text-sm"
                       >
-                        Quitar
+                        Eliminar
                       </button>
                     </div>
                   </td>
