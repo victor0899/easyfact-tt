@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import productService from '../../lib/api/productService';
 import { Product } from '../../types/product';
 import { toast } from 'react-hot-toast';
-import useDebounce from '../../hooks/useDebounce'; // Importar el hook de debounce
+import useDebounce from '../../hooks/useDebounce'; 
 
 const ProductsListPage = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -11,20 +11,13 @@ const ProductsListPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const isComponentMounted = useRef(true);
-  
-  // Aplicar debounce al término de búsqueda
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
-
-  // Función para obtener productos
   const fetchProducts = async (search?: string) => {
-    // No iniciar una nueva búsqueda si ya está cargando
     if (!isComponentMounted.current) return;
     
     setIsLoading(true);
     try {
       const data = await productService.getAll(search);
-      
-      // Verificar si el componente sigue montado antes de actualizar el estado
       if (isComponentMounted.current) {
         setProducts(Array.isArray(data) ? data : []);
         setError(null);
@@ -32,40 +25,31 @@ const ProductsListPage = () => {
       }
     } catch (err) {
       console.error('Error al cargar productos:', err);
-      // Verificar si el componente sigue montado antes de actualizar el estado
       if (isComponentMounted.current) {
         setError('Error al cargar los productos. Por favor, intenta de nuevo.');
         setIsLoading(false);
       }
     }
   };
-
-  // Efecto para carga inicial y limpieza
   useEffect(() => {
     isComponentMounted.current = true;
     fetchProducts();
-    
-    // Configurar intervalo para actualizar productos cada 5 minutos
     const intervalId = setInterval(() => {
       if (isComponentMounted.current) {
         fetchProducts(debouncedSearchTerm);
       }
     }, 300000);
-    
-    // Limpieza al desmontar
     return () => {
       isComponentMounted.current = false;
       clearInterval(intervalId);
     };
-  }, []); // Solo se ejecuta al montar el componente
+  }, []); 
 
-  // Efecto para realizar búsqueda cuando cambia el término de búsqueda con debounce
   useEffect(() => {
-    // Solo buscar si el componente está montado
     if (isComponentMounted.current) {
       fetchProducts(debouncedSearchTerm);
     }
-  }, [debouncedSearchTerm]); // Se ejecuta cuando cambia el término de búsqueda con debounce
+  }, [debouncedSearchTerm]); 
 
   const handleRemoveProduct = (id: string | undefined) => {
     if (!id) return;
@@ -103,7 +87,7 @@ const ProductsListPage = () => {
         <h1 className="text-2xl font-bold mb-4 md:mb-0">Listado de Productos</h1>
         <Link
           to="/products/new"
-          className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-green-700"
+          className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
         >
           + Nuevo Producto
         </Link>
@@ -163,13 +147,13 @@ const ProductsListPage = () => {
                     <div className="flex justify-center space-x-2">
                       <Link
                         to={`/products/${product.id}`}
-                        className="px-3 py-1 bg-red-600 text-white rounded hover:bg-gray-700 text-sm"
+                        className="px-3 py-1 bg-gray-600 text-white rounded hover:bg-gray-700 text-sm"
                       >
                         Editar
                       </Link>
                       <button
                         onClick={() => handleRemoveProduct(product.id)}
-                        className="px-3 py-1 bg-gray-600 text-white rounded hover:bg-red-700 text-sm"
+                        className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
                       >
                         Eliminar
                       </button>
